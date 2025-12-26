@@ -1,0 +1,8 @@
+model Event {
+  id         String    @id @default(cuid())
+  event_type EventType
+  event_time DateTime
+  payload    String?
+  clientId   String    @map("client_id")
+  client     Client    @relation(fields: [clientId], references: [id])
+}

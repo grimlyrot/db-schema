@@ -1,0 +1,64 @@
+model Pixel {
+  id String @id @default(cuid())
+
+  type PixelType
+
+  facebookPixel FacebookPixel?
+  tiktokPixel   TiktokPixel?
+  googleTag     GoogleTag?
+  bigoPixel     BigoPixel?
+
+  Pwa Pwa[]
+}
+
+model FacebookPixel {
+  id String @id
+
+  pixel Pixel @relation(fields: [id], references: [id])
+
+  accessToken String
+
+  mapping Mapping[]
+}
+
+model Mapping {
+  id Int @id @default(autoincrement())
+
+  facebook_pixel_id String
+  facebook_pixel    FacebookPixel @relation(fields: [facebook_pixel_id], references: [id])
+
+  key   EventType
+  value FacebookEvent
+
+  @@unique([facebook_pixel_id, key]) // Ensures each key is unique per MainModel
+}
+
+model TiktokPixel {
+  id    String @id
+  pixel Pixel  @relation(fields: [id], references: [id])
+
+  accessToken String
+}
+
+model GoogleTag {
+  id    String @id
+  pixel Pixel  @relation(fields: [id], references: [id])
+
+  placeholder1 String?
+  placeholder2 String?
+}
+
+model BigoPixel {
+  id    String @id
+  pixel Pixel  @relation(fields: [id], references: [id])
+
+  appId  String
+  appKey String
+}
+
+enum PixelType {
+  FACEBOOK
+  TIKTOK
+  GOOGLE
+  BIGO
+}

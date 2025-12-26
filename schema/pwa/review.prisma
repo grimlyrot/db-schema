@@ -1,0 +1,16 @@
+model Review {
+  id              String    @id @default(cuid())
+  avatar          String?
+  userName        String    @map("user_name")
+  publicationDate DateTime  @map("publication_date")
+  rating          Int
+  likes           Int       @default(0)
+  text            String
+  replyUserName   String?   @map("reply_user_name")
+  replyDate       DateTime? @map("reply_date")
+  replyText       String?   @map("reply_text")
+  pwaId           String    @map("pwa_id")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  pwa             Pwa       @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+}

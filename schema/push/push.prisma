@@ -1,0 +1,30 @@
+model Push {
+  id             String        @id @default(cuid())
+  isActive       Boolean       @default(true) @map("is_active")
+  name           String
+  color          String
+  url            String?
+
+  timeAfterEvent Int?          @map("time_after_event")
+  eventType      EventType?    @map("event_type")
+
+  eventRepeatStrategy    EventRepeatStrategy? @map("event_repeat_strategy")
+  eventRepeatCount       Int?                @map("event_repeat_count")
+  eventRepeatIntervalMin Int?                @map("event_repeat_interval_min")
+  stopOnEvent            EventType?          @map("stop_on_event")
+  stopOnEventWindowMin   Int?                @map("stop_on_event_window_min")
+
+  pushType       PushType      @map("push_type")
+  dateTime       DateTime?     @map("date_time")
+  sendTime       String[]      @map("send_time")
+  pushWeekdays   PushWeekday[]
+  entireTime     Boolean       @default(false) @map("entire_time")
+  startDate      DateTime?     @map("start_date")
+  endDate        DateTime?     @map("end_date")
+  authorId       String        @map("author_id")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  author         User          @relation(fields: [authorId], references: [id])
+  pushContent    PushContent?
+  pushFilters    PushFilter?
+}

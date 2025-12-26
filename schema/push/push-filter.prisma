@@ -1,0 +1,33 @@
+model PushFilter {
+  id                  String             @id @default(cuid())
+  registration_filter RegistrationFilter @map("registration_filter")
+  deposit_filter      DepositFilter      @map("deposit_filter")
+  pwa_filter          PwaFilter          @map("pwa_filter")
+  pwa_ids             String[]
+  geo_filter          GeoFilter          @map("geo_filter")
+  geo                 Country[]
+  pushId              String             @unique @map("push_id")
+  push                Push               @relation(fields: [pushId], references: [id])
+}
+
+enum RegistrationFilter {
+  EVERYONE
+  REGISTERED
+  UNREGISTERED
+}
+
+enum DepositFilter {
+  EVERYONE
+  DEPOSITED
+  NOT_DEPOSITED
+}
+
+enum PwaFilter {
+  ALL
+  SPECIFIC
+}
+
+enum GeoFilter {
+  ALL
+  SPECIFIC
+}

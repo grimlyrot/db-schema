@@ -1,0 +1,19 @@
+{
+  "name": "@monsters/db-schema",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@9.15.0",
+  "devDependencies": {
+    "prisma": "5.22.0"
+  },
+  "scripts": {
+    "workdir:build": "bash tooling/build-workdir.sh",
+    "schema:validate": "pnpm run workdir:build && prisma validate --schema .work/prisma/schema",
+    "schema:format": "pnpm run workdir:build && prisma format --schema .work/prisma/schema",
+    "migrate:dev": "pnpm run workdir:build && prisma migrate dev --schema .work/prisma/schema",
+    "migrate:deploy": "pnpm run workdir:build && prisma migrate deploy --schema .work/prisma/schema",
+    "migrate:resolve": "pnpm run workdir:build && prisma migrate resolve --schema .work/prisma/schema",
+    "migrate:status": "pnpm run workdir:build && prisma migrate status --schema .work/prisma/schema",
+    "migrate:diff": "pnpm run workdir:build && prisma migrate diff --schema .work/prisma/schema"
+  }
+}

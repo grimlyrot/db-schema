@@ -1,0 +1,42 @@
+model CloudflareDomain {
+  id         String   @id @default(cuid())
+  name       String
+  apiKey     String   @map("api_key")
+  email      String
+  domainId   String   @unique @map("domain_id")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  account_id String
+  domain     Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+}
+
+model NamecheapDomain {
+  id               String   @id @default(cuid())
+  name             String
+  apiKey           String   @map("api_key")
+  username         String
+  email            String
+  contactFirstName String   @map("contact_first_name")
+  contactLastName  String   @map("contact_last_name")
+  contactPhone     String   @map("contact_phone")
+  domainId         String   @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  contactAddress   String   @map("contact_address")
+  contactCity      String   @map("contact_city")
+  contactCountry   String   @map("contact_country")
+  contactPostal    String   @map("contact_postal")
+  domain           Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+}
+
+model Domain {
+  id         String            @id @default(cuid())
+  name       String
+  expiresAt  DateTime          @map("expires_at")
+  pwaId      String?           @map("pwa_id")
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  pwa        Pwa?              @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+  cloudflare CloudflareDomain?
+  namecheap  NamecheapDomain?
+}

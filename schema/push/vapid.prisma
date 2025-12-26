@@ -1,0 +1,11 @@
+model Vapid {
+  id         String   @id @default(cuid())
+  publicKey  String
+  privateKey String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  pwaId      String   @unique @map("pwa_id")
+  pwa        Pwa      @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+
+  @@map("vapid")
+}

@@ -1,0 +1,41 @@
+model Client {
+  id String @id @default(cuid()) // Primary Key
+
+  country     Country?
+  city        String?
+  language    Language @default(EN)
+  os          String?
+  deviceModel String?  @map("device_model")
+
+  registration Boolean @default(false)
+  deposit      Boolean @default(false)
+
+  clickDate  DateTime   @map("click_date")
+  userStatus UserStatus @map("user_status")
+  sourceId   Int?       @map("source_id")
+
+  sub1  String?
+  sub2  String?
+  sub3  String?
+  sub4  String?
+  sub5  String?
+  sub6  String?
+  sub7  String?
+  sub8  String?
+  sub9  String?
+  sub10 String?
+
+  fbclid String?
+  ip     String?
+  ua     String?
+
+  previous_client_id String? // New Field
+
+  // Relations
+  pwa   Pwa    @relation(fields: [pwaId], references: [id]) // Foreign Key
+  pwaId String @map("pwa_id") // Foreign Key
+
+  subscriptions Subscription[]
+
+  events Event[]
+}

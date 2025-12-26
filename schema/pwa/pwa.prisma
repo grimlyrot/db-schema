@@ -1,0 +1,91 @@
+model Pwa {
+  id String @id @default(cuid())
+
+  // DESIGN
+  // Language and Category
+  language Language? @default(EN)
+  category Category? @default(GAMBLING)
+
+  // Store Page Design
+  iconImage      Image?     @relation("icon", fields: [iconImageId], references: [id])
+  iconImageId    String?    @map("icon")
+  name           String?
+  developerName  String?    @map("developer_name")
+  verified       Boolean    @default(false)
+  fileSize       Int?       @map("file_size")
+  ageRating      AgeRating? @map("age_rating")
+  totalDownloads Int?       @map("total_downloads")
+
+  // Images and Video
+  images Image[] @relation("images")
+
+  // App description and tags
+  description String?
+  tags        PwaTag[]
+
+  // Rating and Reviews
+  rating Rating?
+
+  // Comments
+  reviews Review[]
+  // END DESIGN
+
+  // USER
+  creator   User   @relation(fields: [creatorId], references: [id])
+  creatorId String @map("creator_id")
+  // END USER
+
+  // VERSION
+  variant       Variant @default(MAIN)
+  // Self-Referencing Relations
+  originalPwaId String? @unique @map("original_pwa_id")
+  shadowPwaId   String? @unique @map("shadow_pwa_id")
+  // END VERSION
+
+  minLoadTime Float? @default(3000) @map("min_load_time")
+  maxLoadTime Float? @default(15000) @map("max_load_time")
+
+  isEditorsChoice Boolean @default(false) @map("is_editors_choice")
+
+  geo Country?
+
+  updateDate                 DateTime? @map("update_date")
+  updateDescription          String?   @map("update_description")
+  facebookDomainVerification String?   @map("facebook_domain_verification")
+
+  status Status @default(DRAFT)
+
+  // ENUMS
+  storeCategory StoreCategory? @map("store_category")
+
+  //#region Relations
+  // Need to copy evering when creating a shadow
+  cloackSettings CloakSettings?
+  domain         Domain[]
+  tracker        Tracker?
+
+  developerContacts   DeveloperContacts? @relation(fields: [developerContactsId], references: [id])
+  developerContactsId String?            @map("developer_contacts_id")
+  //#endregion
+
+  // Do not need to update on merge
+  clients       Client[]
+  subscriptions Subscription[]
+
+  pushEnabled   Boolean @default(true) @map("push_enabled")
+  richUi        Boolean @default(false) @map("rich_ui")
+  themeChanging Boolean @default(false) @map("theme_changing")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vapid Vapid?
+
+  postbacks Postback[]
+  pixels    Pixel[]
+}
+
+enum Variant {
+  MAIN
+  SHADOW
+}

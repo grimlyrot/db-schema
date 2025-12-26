@@ -1,0 +1,23 @@
+model PushContent {
+  id           String                   @id @default(cuid())
+  iconId       String?
+  imageId      String?
+  pushId       String                   @unique
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+  icon         Image?                   @relation("PushContentIcon", fields: [iconId], references: [id])
+  image        Image?                   @relation("PushContentIconImage", fields: [imageId], references: [id])
+  push         Push                     @relation(fields: [pushId], references: [id])
+  translations PushContentTranslation[]
+}
+
+model PushContentTranslation {
+  id            String      @id @default(cuid())
+  language      Language
+  title         String
+  text          String
+  pushContentId String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  pushContent   PushContent @relation(fields: [pushContentId], references: [id])
+}

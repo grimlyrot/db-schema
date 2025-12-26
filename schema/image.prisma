@@ -1,0 +1,14 @@
+model Image {
+  id               String        @id @default(cuid())
+  assetId          String        @map("asset_id")
+  url              String
+  publicId         String        @map("public_id")
+  pwaId            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  Pwa              Pwa?          @relation("images", fields: [pwaId], references: [id])
+  pushContentImage PushContent[] @relation("PushContentIcon")
+  pushContentIcon  PushContent[] @relation("PushContentIconImage")
+  iconOf           Pwa[]         @relation("icon")
+  User             User?
+}

@@ -1,0 +1,12 @@
+model Subscription {
+  endpoint       String
+  expirationTime DateTime? @map("expiration_time")
+  p256dh         String
+  auth           String
+  clientId       String    @map("client_id")
+  pwaId          String    @map("pwa_id")
+  client         Client    @relation(fields: [clientId], references: [id])
+  pwa            Pwa       @relation(fields: [pwaId], references: [id])
+
+  @@id([clientId, pwaId])
+}

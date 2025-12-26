@@ -1,0 +1,14 @@
+model Rating {
+  id               String   @id @default(cuid())
+  totalRating      Float    @map("total_rating")
+  totalReviews     Int      @map("total_reviews")
+  fiveStarPercent  Float    @map("five_star_percent")
+  fourStarPercent  Float    @map("four_star_percent")
+  threeStarPercent Float    @map("three_star_percent")
+  twoStarPercent   Float    @map("two_star_percent")
+  oneStarPercent   Float    @map("one_star_percent")
+  pwaId            String   @unique @map("pwa_id")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  pwa              Pwa      @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+}

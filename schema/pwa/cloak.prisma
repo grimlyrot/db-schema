@@ -1,0 +1,16 @@
+model CloakSettings {
+  id                       String       @id @default(cuid())
+  androidOnly              Boolean      @default(false) @map("android_only")
+  blockVpnTorHosting       Boolean      @default(false) @map("block_vpn_tor_hosting")
+  blockProxy               Boolean      @default(false) @map("block_proxy")
+  trafficbackForAll        Boolean      @default(false) @map("trafficback_for_all")
+  trafficbackForNotAndroid Boolean      @default(false) @map("trafficback_for_not_android")
+  pixelAsImg               Boolean      @default(false) @map("pixel_as_img")
+  pixelInWhitePage         Boolean      @default(false) @map("pixel_in_white_page")
+  redirectType             RedirectType @default(CUSTOM) @map("redirect_type")
+  whitePageUrl             String?      @map("white_page_url")
+  pwaId                    String       @unique @map("pwa_id")
+  createdAt                DateTime     @default(now())
+  updatedAt                DateTime     @updatedAt
+  pwa                      Pwa          @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+}

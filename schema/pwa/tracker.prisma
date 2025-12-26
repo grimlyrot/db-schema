@@ -1,0 +1,9 @@
+model Tracker {
+  id        String   @id @default(cuid())
+  name      String
+  link      String
+  pwaId     String   @unique @map("pwa_id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pwa       Pwa      @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,15 @@
+model Postback {
+  id        String    @id @default(cuid())
+  type      EventType
+  url       String
+  method    Method
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pwaId     String    @unique @map("pwa_id")
+  pwa       Pwa       @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+}
+
+enum Method {
+  GET
+  POST
+}

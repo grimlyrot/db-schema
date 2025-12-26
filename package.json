@@ -8,12 +8,16 @@
   },
   "scripts": {
     "workdir:build": "bash tooling/build-workdir.sh",
+
     "schema:validate": "pnpm run workdir:build && prisma validate --schema .work/prisma/schema",
-    "schema:format": "pnpm run workdir:build && prisma format --schema .work/prisma/schema",
-    "migrate:dev": "pnpm run workdir:build && prisma migrate dev --schema .work/prisma/schema",
-    "migrate:deploy": "pnpm run workdir:build && prisma migrate deploy --schema .work/prisma/schema",
-    "migrate:resolve": "pnpm run workdir:build && prisma migrate resolve --schema .work/prisma/schema",
-    "migrate:status": "pnpm run workdir:build && prisma migrate status --schema .work/prisma/schema",
-    "migrate:diff": "pnpm run workdir:build && prisma migrate diff --schema .work/prisma/schema"
+    "schema:format":   "pnpm run workdir:build && prisma format   --schema .work/prisma/schema",
+
+    "migrate:dev":     "pnpm run workdir:build && prisma migrate dev    --schema .work/prisma/schema",
+    "migrate:deploy":  "pnpm run workdir:build && prisma migrate deploy --schema .work/prisma/schema",
+
+    "diff:from-db":    "pnpm run workdir:build && prisma migrate diff --from-url \"$POSTGRES_URL\" --to-schema-datamodel .work/prisma/schema",
+    "diff:from-empty": "pnpm run workdir:build && prisma migrate diff --from-empty --to-schema-datamodel .work/prisma/schema --script",
+
+    "db:pull":         "pnpm run workdir:build && prisma db pull --schema .work/prisma/schema"
   }
 }

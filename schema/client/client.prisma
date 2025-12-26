@@ -25,9 +25,10 @@ model Client {
   sub9  String?
   sub10 String?
 
-  fbclid String?
-  ip     String?
-  ua     String?
+  fbclid      String?
+  fb_gen_mail String?
+  ip          String?
+  ua          String?
 
   previous_client_id String? // New Field
 

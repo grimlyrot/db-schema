@@ -19,11 +19,12 @@ mkdir -p "$WORK/prisma/schema"
 # 1) Create schema.prisma from template
 cp "$ROOT/tooling/prisma-migrate-template.prisma.txt" "$WORK/prisma/schema/schema.prisma"
 
-# 2) Copy all datamodel files (*.prisma) from ./schema into workdir
-rsync -a --include='*/' --include='*.prisma' --exclude='*' "$ROOT/schema/" "$WORK/prisma/schema/"
+# 2) Copy all datamodel files from ./schema into workdir (portable, no rsync)
+cp -R "$ROOT/schema/." "$WORK/prisma/schema/"
 
-# 3) Attach migrations (symlink)
+# 3) Copy migrations into workdir (no symlink, portable)
 mkdir -p "$ROOT/prisma/migrations"
-ln -s "$ROOT/prisma/migrations" "$WORK/prisma/migrations"
+mkdir -p "$WORK/prisma"
+cp -R "$ROOT/prisma/migrations" "$WORK/prisma/migrations"
 
 echo "Workdir built at: $WORK"

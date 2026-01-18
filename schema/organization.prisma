@@ -1,0 +1,82 @@
+model Organization {
+  id        String             @id @default(cuid())
+  name      String
+  status    OrganizationStatus @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  deletedAt DateTime?          @map("deleted_at")
+
+  teams        Team[]
+  memberships  OrgMembership[]
+  roles        Role[]
+  invites      Invite[]
+  joinRequests JoinRequest[]
+  projects     Project[]
+  projectPushes ProjectPush[]
+  permissionOverrides UserPermissionOverride[]
+  auditLogs    AuditLog[]
+
+  @@map("organizations")
+}
+
+model OrgMembership {
+  id        String              @id @default(cuid())
+  userId    String              @map("user_id")
+  orgId     String              @map("org_id")
+  status    OrgMembershipStatus @default(ACTIVE)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  user         User           @relation(fields: [userId], references: [id])
+  organization Organization   @relation(fields: [orgId], references: [id])
+  teamMemberships TeamMembership[]
+  roles        OrgMemberRole[]
+
+  @@unique([userId, orgId])
+  @@index([orgId])
+  @@map("org_memberships")
+}
+
+model Team {
+  id        String     @id @default(cuid())
+  orgId     String     @map("org_id")
+  name      String
+  status    TeamStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  @map("deleted_at")
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  memberships  TeamMembership[]
+  projects     Project[]
+  projectPushes ProjectPush[]
+  roles        Role[]
+  invites      Invite[]
+  joinRequests JoinRequest[]
+  permissionOverrides UserPermissionOverride[]
+  auditLogs    AuditLog[]
+
+  @@index([orgId])
+  @@map("teams")
+}
+
+model TeamMembership {
+  id              String               @id @default(cuid())
+  legacyRole      TeamRole             @default(MEMBER) @map("role")
+  userId          String               @map("user_id")
+  teamId          String               @map("team_id")
+  orgMembershipId String               @map("org_membership_id")
+  status          TeamMembershipStatus @default(ACTIVE)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  team           Team          @relation(fields: [teamId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+  orgMembership  OrgMembership @relation(fields: [orgMembershipId], references: [id])
+  roles          TeamMemberRole[]
+
+  @@unique([userId, teamId])
+  @@index([teamId])
+  @@index([orgMembershipId])
+  @@map("team_roles")
+}

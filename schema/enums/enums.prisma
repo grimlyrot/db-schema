@@ -456,3 +456,58 @@ enum PushWeekday {
   SATURDAY
   SUNDAY
 }
+
+enum OrganizationStatus {
+  ACTIVE
+  READ_ONLY
+  FROZEN
+  DELETED
+}
+
+enum TeamStatus {
+  ACTIVE
+  READ_ONLY
+  FROZEN
+  DELETED
+}
+
+enum OrgMembershipStatus {
+  WAITLIST
+  INVITED
+  ACTIVE
+  READ_ONLY
+  SUSPENDED
+}
+
+enum TeamMembershipStatus {
+  INVITED
+  ACTIVE
+  READ_ONLY
+  SUSPENDED
+}
+
+enum RoleScope {
+  APP
+  ORG
+  TEAM
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELED
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}

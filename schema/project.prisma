@@ -1,0 +1,37 @@
+model Project {
+  id           String   @id @default(cuid())
+  name         String
+  ownerUserId  String   @map("owner_user_id")
+  orgId        String   @map("org_id")
+  teamId       String   @map("team_id")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  owner        User         @relation("ProjectOwner", fields: [ownerUserId], references: [id])
+  organization Organization @relation(fields: [orgId], references: [id])
+  team         Team         @relation(fields: [teamId], references: [id])
+  pushes       ProjectPush[]
+
+  @@index([ownerUserId])
+  @@index([orgId])
+  @@index([teamId])
+  @@map("projects")
+}
+
+model ProjectPush {
+  id        String   @id @default(cuid())
+  projectId String   @map("project_id")
+  orgId     String   @map("org_id")
+  teamId    String   @map("team_id")
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  project      Project      @relation(fields: [projectId], references: [id])
+  organization Organization @relation(fields: [orgId], references: [id])
+  team         Team         @relation(fields: [teamId], references: [id])
+
+  @@index([projectId])
+  @@index([orgId])
+  @@index([teamId])
+  @@map("project_pushes")
+}

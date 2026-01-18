@@ -249,9 +249,11 @@ WHERE om."id" IS NULL;
 
 UPDATE "team_roles" tr
 SET "org_membership_id" = om."id"
-FROM "tmp_team_owner" o
-JOIN "org_memberships" om ON om."user_id" = tr."user_id" AND om."org_id" = CONCAT('org_user_', o."owner_user_id")
-WHERE tr."team_id" = o."team_id" AND tr."org_membership_id" IS NULL;
+FROM "tmp_team_owner" o, "org_memberships" om
+WHERE tr."team_id" = o."team_id"
+  AND om."user_id" = tr."user_id"
+  AND om."org_id" = CONCAT('org_user_', o."owner_user_id")
+  AND tr."org_membership_id" IS NULL;
 
 INSERT INTO "organizations" ("id", "name", "status", "createdAt", "updatedAt")
 VALUES ('org_orphan_teams', 'Orphan Teams', 'ACTIVE', NOW(), NOW())

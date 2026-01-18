@@ -87,6 +87,8 @@ model Pwa {
 
   postbacks Postback[]
   pixels    Pixel[]
+
+  @@index([teamId])
 }
 
 enum Variant {

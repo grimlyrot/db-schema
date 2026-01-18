@@ -31,4 +31,7 @@ model Push {
   teamId         String        @map("team_id")
   pushContent    PushContent?
   pushFilters    PushFilter?
+
+  @@index([teamId])
+  @@index([authorId])
 }

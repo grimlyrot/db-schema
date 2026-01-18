@@ -87,6 +87,7 @@ model Pwa {
 
   postbacks Postback[]
   pixels    Pixel[]
+  pushTargets PushTargetPwa[]
 
   @@index([teamId])
 }

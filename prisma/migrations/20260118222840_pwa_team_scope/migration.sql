@@ -193,61 +193,71 @@ CREATE TABLE "user_permission_overrides" (
     CONSTRAINT "user_permission_overrides_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "push_target_pwas" (
+    "push_id" TEXT NOT NULL,
+    "pwa_id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "push_target_pwas_pkey" PRIMARY KEY ("push_id","pwa_id")
+);
+
 -- DataMigration
+CREATE TEMP TABLE "tmp_authz_users" AS
+SELECT "id" AS "user_id" FROM "users";
+
 INSERT INTO "organizations" ("id", "name", "status", "createdAt", "updatedAt")
-VALUES ('org_default', 'Default Organization', 'ACTIVE', NOW(), NOW())
+SELECT CONCAT('org_user_', "user_id"), CONCAT('Personal Org - ', "user_id"), 'ACTIVE', NOW(), NOW()
+FROM "tmp_authz_users"
 ON CONFLICT ("id") DO NOTHING;
 
-UPDATE "teams" SET "org_id" = 'org_default' WHERE "org_id" IS NULL;
-
-CREATE TEMP TABLE "tmp_authz_users" (
-  "user_id" TEXT PRIMARY KEY
-);
-
-INSERT INTO "tmp_authz_users" ("user_id")
-SELECT DISTINCT "user_id"
-FROM (
-  SELECT "creator_id" AS "user_id" FROM "Pwa"
-  UNION
-  SELECT "author_id" AS "user_id" FROM "Push"
-  UNION
-  SELECT "user_id" AS "user_id" FROM "team_roles"
-) AS "users";
-
 INSERT INTO "org_memberships" ("id", "user_id", "org_id", "status", "createdAt", "updatedAt")
-SELECT gen_random_uuid()::text, "user_id", 'org_default', 'ACTIVE', NOW(), NOW()
+SELECT gen_random_uuid()::text, "user_id", CONCAT('org_user_', "user_id"), 'ACTIVE', NOW(), NOW()
 FROM "tmp_authz_users" u
 WHERE NOT EXISTS (
-  SELECT 1 FROM "org_memberships" om WHERE om."user_id" = u."user_id" AND om."org_id" = 'org_default'
+  SELECT 1 FROM "org_memberships" om WHERE om."user_id" = u."user_id" AND om."org_id" = CONCAT('org_user_', u."user_id")
 );
 
-CREATE TEMP TABLE "tmp_user_team" (
-  "user_id" TEXT PRIMARY KEY,
-  "team_id" TEXT NOT NULL
-);
-
-INSERT INTO "tmp_user_team" ("user_id", "team_id")
-SELECT u."user_id", gen_random_uuid()::text
-FROM "tmp_authz_users" u
-LEFT JOIN "team_roles" tr ON tr."user_id" = u."user_id"
-WHERE tr."id" IS NULL;
-
-INSERT INTO "teams" ("id", "name", "org_id", "createdAt", "updatedAt")
-SELECT t."team_id", CONCAT('Personal Team - ', t."user_id"), 'org_default', NOW(), NOW()
-FROM "tmp_user_team" t
+INSERT INTO "teams" ("id", "name", "org_id", "createdAt", "updatedAt", "status")
+SELECT CONCAT('team_user_', "user_id"), CONCAT('Personal Team - ', "user_id"), CONCAT('org_user_', "user_id"), NOW(), NOW(), 'ACTIVE'
+FROM "tmp_authz_users"
 ON CONFLICT ("id") DO NOTHING;
 
 INSERT INTO "team_roles" ("id", "role", "user_id", "team_id", "org_membership_id", "status", "createdAt", "updatedAt")
-SELECT gen_random_uuid()::text, 'OWNER', t."user_id", t."team_id", om."id", 'ACTIVE', NOW(), NOW()
-FROM "tmp_user_team" t
-JOIN "org_memberships" om ON om."user_id" = t."user_id" AND om."org_id" = 'org_default';
+SELECT gen_random_uuid()::text, 'OWNER', u."user_id", CONCAT('team_user_', u."user_id"), om."id", 'ACTIVE', NOW(), NOW()
+FROM "tmp_authz_users" u
+JOIN "org_memberships" om ON om."user_id" = u."user_id" AND om."org_id" = CONCAT('org_user_', u."user_id")
+LEFT JOIN "team_roles" tr ON tr."user_id" = u."user_id" AND tr."team_id" = CONCAT('team_user_', u."user_id")
+WHERE tr."id" IS NULL;
+
+CREATE TEMP TABLE "tmp_team_owner" AS
+SELECT tr."team_id", MIN(tr."user_id") AS "owner_user_id"
+FROM "team_roles" tr
+GROUP BY tr."team_id";
+
+UPDATE "teams" t
+SET "org_id" = CONCAT('org_user_', o."owner_user_id")
+FROM "tmp_team_owner" o
+WHERE t."id" = o."team_id" AND t."org_id" IS NULL;
+
+INSERT INTO "org_memberships" ("id", "user_id", "org_id", "status", "createdAt", "updatedAt")
+SELECT gen_random_uuid()::text, tr."user_id", CONCAT('org_user_', o."owner_user_id"), 'ACTIVE', NOW(), NOW()
+FROM "team_roles" tr
+JOIN "tmp_team_owner" o ON o."team_id" = tr."team_id"
+LEFT JOIN "org_memberships" om ON om."user_id" = tr."user_id" AND om."org_id" = CONCAT('org_user_', o."owner_user_id")
+WHERE om."id" IS NULL;
 
 UPDATE "team_roles" tr
 SET "org_membership_id" = om."id"
-FROM "org_memberships" om
-WHERE tr."org_membership_id" IS NULL
-  AND tr."user_id" = om."user_id"
-  AND om."org_id" = 'org_default';
+FROM "tmp_team_owner" o
+JOIN "org_memberships" om ON om."user_id" = tr."user_id" AND om."org_id" = CONCAT('org_user_', o."owner_user_id")
+WHERE tr."team_id" = o."team_id" AND tr."org_membership_id" IS NULL;
+
+INSERT INTO "organizations" ("id", "name", "status", "createdAt", "updatedAt")
+VALUES ('org_orphan_teams', 'Orphan Teams', 'ACTIVE', NOW(), NOW())
+ON CONFLICT ("id") DO NOTHING;
+
+UPDATE "teams" SET "org_id" = 'org_orphan_teams' WHERE "org_id" IS NULL;
 
 CREATE TEMP TABLE "tmp_primary_team" AS
 SELECT "user_id", MIN("team_id") AS "team_id"
@@ -255,21 +265,47 @@ FROM "team_roles"
 GROUP BY "user_id";
 
 UPDATE "Pwa" p
-SET "org_id" = 'org_default',
-    "team_id" = t."team_id"
+SET "team_id" = t."team_id",
+    "org_id" = tm."org_id"
 FROM "tmp_primary_team" t
+JOIN "teams" tm ON tm."id" = t."team_id"
 WHERE p."creator_id" = t."user_id"
   AND (p."org_id" IS NULL OR p."team_id" IS NULL);
 
+CREATE TEMP TABLE "tmp_push_team" AS
+SELECT pf."push_id",
+       MIN(p."team_id") AS "team_id",
+       COUNT(DISTINCT p."team_id") AS "team_count"
+FROM "PushFilter" pf
+JOIN unnest(pf."pwa_ids") AS "pwa_id" ON TRUE
+JOIN "Pwa" p ON p."id" = "pwa_id"
+GROUP BY pf."push_id";
+
 UPDATE "Push" p
-SET "org_id" = 'org_default',
-    "team_id" = t."team_id"
+SET "team_id" = t."team_id",
+    "org_id" = tm."org_id"
+FROM "tmp_push_team" t
+JOIN "teams" tm ON tm."id" = t."team_id"
+WHERE p."id" = t."push_id"
+  AND t."team_count" = 1
+  AND (p."org_id" IS NULL OR p."team_id" IS NULL);
+
+UPDATE "Push" p
+SET "team_id" = t."team_id",
+    "org_id" = tm."org_id"
 FROM "tmp_primary_team" t
+JOIN "teams" tm ON tm."id" = t."team_id"
 WHERE p."author_id" = t."user_id"
   AND (p."org_id" IS NULL OR p."team_id" IS NULL);
 
+INSERT INTO "push_target_pwas" ("push_id", "pwa_id")
+SELECT pf."push_id", "pwa_id"
+FROM "PushFilter" pf, unnest(pf."pwa_ids") AS "pwa_id"
+ON CONFLICT DO NOTHING;
+
+DROP TABLE "tmp_push_team";
 DROP TABLE "tmp_primary_team";
-DROP TABLE "tmp_user_team";
+DROP TABLE "tmp_team_owner";
 DROP TABLE "tmp_authz_users";
 
 ALTER TABLE "teams" ALTER COLUMN "org_id" SET NOT NULL;
@@ -335,6 +371,9 @@ CREATE INDEX "Push_author_id_idx" ON "Push"("author_id");
 
 -- CreateIndex
 CREATE INDEX "Pwa_team_id_idx" ON "Pwa"("team_id");
+
+-- CreateIndex
+CREATE INDEX "push_target_pwas_pwa_id_idx" ON "push_target_pwas"("pwa_id");
 
 -- CreateIndex
 CREATE INDEX "team_roles_team_id_idx" ON "team_roles"("team_id");
@@ -407,6 +446,12 @@ ALTER TABLE "Pwa" ADD CONSTRAINT "Pwa_org_id_fkey" FOREIGN KEY ("org_id") REFERE
 
 -- AddForeignKey
 ALTER TABLE "Pwa" ADD CONSTRAINT "Pwa_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "push_target_pwas" ADD CONSTRAINT "push_target_pwas_push_id_fkey" FOREIGN KEY ("push_id") REFERENCES "Push"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "push_target_pwas" ADD CONSTRAINT "push_target_pwas_pwa_id_fkey" FOREIGN KEY ("pwa_id") REFERENCES "Pwa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "roles" ADD CONSTRAINT "roles_org_id_fkey" FOREIGN KEY ("org_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;

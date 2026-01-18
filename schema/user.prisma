@@ -19,7 +19,6 @@ model User {
   invitesAccepted   Invite[]        @relation("InviteAccepted")
   joinRequests      JoinRequest[]
   auditLogs         AuditLog[]      @relation("AuditActor")
-  ownedProjects     Project[]       @relation("ProjectOwner")
   avatar        Image?         @relation(fields: [imageId], references: [id])
 
   @@map("users")

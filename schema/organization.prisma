@@ -11,8 +11,8 @@ model Organization {
   roles        Role[]
   invites      Invite[]
   joinRequests JoinRequest[]
-  projects     Project[]
-  projectPushes ProjectPush[]
+  pwas         Pwa[]
+  pushes       Push[]
   permissionOverrides UserPermissionOverride[]
   auditLogs    AuditLog[]
 
@@ -48,8 +48,8 @@ model Team {
 
   organization Organization @relation(fields: [orgId], references: [id])
   memberships  TeamMembership[]
-  projects     Project[]
-  projectPushes ProjectPush[]
+  pwas         Pwa[]
+  pushes       Push[]
   roles        Role[]
   invites      Invite[]
   joinRequests JoinRequest[]

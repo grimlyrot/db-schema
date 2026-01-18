@@ -33,6 +33,10 @@ model Pwa {
   // USER
   creator   User   @relation(fields: [creatorId], references: [id])
   creatorId String @map("creator_id")
+  organization Organization @relation(fields: [orgId], references: [id])
+  orgId        String       @map("org_id")
+  team         Team         @relation(fields: [teamId], references: [id])
+  teamId       String       @map("team_id")
   // END USER
 
   // VERSION

@@ -492,9 +492,11 @@ enum RoleScope {
   TEAM
 }
 
-enum Role {
+enum LegacyRole {
   USER
   ADMIN
+
+  @@map("Role")
 }
 
 enum InviteStatus {

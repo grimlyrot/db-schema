@@ -492,6 +492,11 @@ enum RoleScope {
   TEAM
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 enum InviteStatus {
   PENDING
   ACCEPTED

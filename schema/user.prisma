@@ -1,6 +1,6 @@
 model User {
   id            String         @id @default(cuid())
-  role          Role           @default(USER)
+  legacyRole    LegacyRole     @default(USER) @map("role")
   username      String
   email         String         @unique
   passwordHash  String
@@ -13,42 +13,14 @@ model User {
   pwas          Pwa[]
   accounts      Account[]
   sessions      Session[]
-  teams         TeamRoleUser[]
+  teamMemberships   TeamMembership[]
+  orgMemberships    OrgMembership[]
+  permissionOverrides UserPermissionOverride[]
+  invitesSent       Invite[]        @relation("InviteSent")
+  invitesAccepted   Invite[]        @relation("InviteAccepted")
+  joinRequests      JoinRequest[]
+  auditLogs         AuditLog[]      @relation("AuditActor")
   avatar        Image?         @relation(fields: [imageId], references: [id])
 
   @@map("users")
-}
-
-model TeamRoleUser {
-  id        String   @id @default(cuid())
-  role      TeamRole
-  userId    String
-  teamId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  team      Team     @relation(fields: [teamId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@map("team_roles")
-}
-
-model Team {
-  id        String         @id @default(cuid())
-  name      String
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  users     TeamRoleUser[]
-
-  @@map("teams")
-}
-
-enum TeamRole {
-  OWNER
-  ADMIN
-  MEMBER
-}
-
-enum Role {
-  USER
-  ADMIN
 }

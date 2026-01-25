@@ -25,6 +25,27 @@ model Push {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   author         User          @relation(fields: [authorId], references: [id])
+  organization   Organization  @relation(fields: [orgId], references: [id])
+  orgId          String        @map("org_id")
+  team           Team          @relation(fields: [teamId], references: [id])
+  teamId         String        @map("team_id")
   pushContent    PushContent?
   pushFilters    PushFilter?
+  targets        PushTargetPwa[]
+
+  @@index([teamId])
+  @@index([authorId])
+}
+
+model PushTargetPwa {
+  pushId    String   @map("push_id")
+  pwaId     String   @map("pwa_id")
+  createdAt DateTime @default(now())
+
+  push Push @relation(fields: [pushId], references: [id], onDelete: Cascade)
+  pwa  Pwa  @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+
+  @@id([pushId, pwaId])
+  @@index([pwaId])
+  @@map("push_target_pwas")
 }

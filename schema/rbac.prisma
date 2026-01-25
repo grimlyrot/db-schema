@@ -1,0 +1,89 @@
+model Permission {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  description String?
+  scope       RoleScope
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  roles     RolePermission[]
+  overrides UserPermissionOverride[]
+
+  @@map("permissions")
+}
+
+model Role {
+  id          String    @id @default(cuid())
+  scope       RoleScope
+  orgId       String?   @map("org_id")
+  teamId      String?   @map("team_id")
+  name        String
+  isSystem    Boolean   @default(false) @map("is_system")
+  isProtected Boolean   @default(false) @map("is_protected")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  organization Organization? @relation(fields: [orgId], references: [id])
+  team         Team?         @relation(fields: [teamId], references: [id])
+  permissions  RolePermission[]
+  orgMemberRoles  OrgMemberRole[]
+  teamMemberRoles TeamMemberRole[]
+
+  @@unique([scope, orgId, teamId, name])
+  @@index([orgId])
+  @@index([teamId])
+  @@map("roles")
+}
+
+model RolePermission {
+  roleId       String @map("role_id")
+  permissionId String @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model OrgMemberRole {
+  orgMembershipId String @map("org_membership_id")
+  roleId          String @map("role_id")
+
+  orgMembership OrgMembership @relation(fields: [orgMembershipId], references: [id], onDelete: Cascade)
+  role          Role          @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([orgMembershipId, roleId])
+  @@map("org_member_roles")
+}
+
+model TeamMemberRole {
+  teamMembershipId String @map("team_membership_id")
+  roleId           String @map("role_id")
+
+  teamMembership TeamMembership @relation(fields: [teamMembershipId], references: [id], onDelete: Cascade)
+  role           Role           @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([teamMembershipId, roleId])
+  @@map("team_member_roles")
+}
+
+model UserPermissionOverride {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  permissionId String    @map("permission_id")
+  scope        RoleScope
+  orgId        String?   @map("org_id")
+  teamId       String?   @map("team_id")
+  createdAt    DateTime  @default(now())
+
+  user         User         @relation(fields: [userId], references: [id])
+  permission   Permission   @relation(fields: [permissionId], references: [id])
+  organization Organization? @relation(fields: [orgId], references: [id])
+  team         Team?        @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, permissionId, scope, orgId, teamId])
+  @@index([orgId])
+  @@index([teamId])
+  @@map("user_permission_overrides")
+}

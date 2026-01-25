@@ -1,0 +1,19 @@
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?  @map("actor_user_id")
+  orgId       String?  @map("org_id")
+  teamId      String?  @map("team_id")
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String?  @map("entity_id")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  actorUser    User?        @relation("AuditActor", fields: [actorUserId], references: [id])
+  organization Organization? @relation(fields: [orgId], references: [id])
+  team         Team?        @relation(fields: [teamId], references: [id])
+
+  @@index([orgId])
+  @@index([teamId])
+  @@map("audit_logs")
+}

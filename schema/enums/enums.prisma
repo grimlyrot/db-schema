@@ -436,6 +436,23 @@ enum RedirectType {
   CUSTOM
 }
 
+enum AllowedOS {
+  ANDROID_ONLY
+  MOBILE_ONLY
+  ALL_PLATFORMS
+}
+
+enum GeoFilterMode {
+  OFF
+  WHITELIST
+  BLACKLIST
+}
+
+enum DeniedAccessAction {
+  REDIRECT_URL
+  BLANK_PAGE
+}
+
 enum UserStatus {
   ACTIVE
   INACTIVE

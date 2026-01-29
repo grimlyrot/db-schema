@@ -1,6 +1,9 @@
 model CloakSettings {
   id                       String       @id @default(cuid())
   androidOnly              Boolean      @default(false) @map("android_only")
+  allowedOS                AllowedOS    @default(ANDROID_ONLY) @map("allowed_os")
+  geoFilterMode            GeoFilterMode @default(OFF) @map("geo_filter_mode")
+  geoCountries             Country[]    @default([]) @map("geo_countries")
   blockVpnTorHosting       Boolean      @default(false) @map("block_vpn_tor_hosting")
   blockProxy               Boolean      @default(false) @map("block_proxy")
   trafficbackForAll        Boolean      @default(false) @map("trafficback_for_all")

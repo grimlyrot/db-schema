@@ -8,6 +8,8 @@ model PushFilter {
   geo                 Country[]
   pushId              String             @unique @map("push_id")
   push                Push               @relation(fields: [pushId], references: [id])
+
+  @@index([geo], type: Gin)
 }
 
 enum RegistrationFilter {

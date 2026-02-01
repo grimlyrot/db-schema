@@ -104,6 +104,10 @@ model Pwa {
 
   @@index([teamId])
   @@index([edgeAccountId], map: "Pwa_edge_account_id_idx")
+  @@index([variant, teamId, createdAt])
+  @@index([variant, orgId, createdAt])
+  @@index([variant, creatorId, createdAt])
+  @@index([variant, status, createdAt])
 }
 
 enum Variant {

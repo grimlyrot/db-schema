@@ -5,4 +5,7 @@ model Event {
   payload    String?
   clientId   String    @map("client_id")
   client     Client    @relation(fields: [clientId], references: [id])
+
+  @@index([event_type, event_time])
+  @@index([clientId, event_time])
 }

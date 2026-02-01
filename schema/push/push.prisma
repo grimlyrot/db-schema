@@ -35,6 +35,8 @@ model Push {
 
   @@index([teamId])
   @@index([authorId])
+  @@index([orgId])
+  @@index([isActive, createdAt])
 }
 
 model PushTargetPwa {

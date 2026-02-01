@@ -90,6 +90,10 @@ model Pwa {
   pushTargets PushTargetPwa[]
 
   @@index([teamId])
+  @@index([variant, teamId, createdAt])
+  @@index([variant, orgId, createdAt])
+  @@index([variant, creatorId, createdAt])
+  @@index([variant, status, createdAt])
 }
 
 enum Variant {

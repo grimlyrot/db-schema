@@ -1,0 +1,15 @@
+model EventDailyAggregate {
+  date  DateTime @db.Date
+  pwaId String   @map("pwa_id")
+  pwa   Pwa      @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+
+  uniques       Int
+  visits        Int
+  installs      Int
+  opens         Int
+  registrations Int
+  deposits      Int
+
+  @@id([pwaId, date])
+  @@index([date])
+}

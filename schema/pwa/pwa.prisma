@@ -88,6 +88,7 @@ model Pwa {
   postbacks Postback[]
   pixels    Pixel[]
   pushTargets PushTargetPwa[]
+  eventDailyAggregates EventDailyAggregate[]
 
   @@index([teamId])
   @@index([variant, teamId, createdAt])

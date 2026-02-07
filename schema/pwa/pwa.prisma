@@ -80,6 +80,15 @@ model Pwa {
   richUi        Boolean @default(false) @map("rich_ui")
   themeChanging Boolean @default(false) @map("theme_changing")
 
+  // Edge runtime config
+  edgeMode          EdgeMode        @default(LEGACY) @map("edge_mode")
+  edgeVersion       String?         @map("edge_version")
+  originPagesUrl    String?         @map("origin_pages_url")
+  edgeAccountId     String?         @map("edge_account_id")
+  edgeAccount       CloudflareAccount? @relation(fields: [edgeAccountId], references: [id])
+  edgeConfig        Json?           @map("edge_config")
+  edgeConfigUpdatedAt DateTime?     @map("edge_config_updated_at")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -95,4 +104,9 @@ model Pwa {
 enum Variant {
   MAIN
   SHADOW
+}
+
+enum EdgeMode {
+  LEGACY
+  WORKER
 }

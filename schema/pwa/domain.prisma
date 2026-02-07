@@ -10,6 +10,20 @@ model CloudflareDomain {
   domain     Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
 }
 
+model CloudflareAccount {
+  id          String   @id @default(cuid())
+  name        String?
+  accountId   String   @map("account_id")
+  apiToken    String   @map("api_token")
+  email       String?
+  status      String?  @default("ACTIVE")
+  zoneCount   Int      @default(0) @map("zone_count")
+  workerCount Int      @default(0) @map("worker_count")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pwas        Pwa[]
+}
+
 model NamecheapDomain {
   id               String   @id @default(cuid())
   name             String

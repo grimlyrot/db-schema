@@ -19,9 +19,15 @@ model CloudflareAccount {
   status      String?  @default("ACTIVE")
   zoneCount   Int      @default(0) @map("zone_count")
   workerCount Int      @default(0) @map("worker_count")
+  // Cloudflare for SaaS (Custom Hostnames) config.
+  // Allows attaching user-owned domains to our Worker without deploying code into user accounts.
+  saasZoneId     String? @map("saas_zone_id")
+  saasZoneName   String? @map("saas_zone_name")
+  saasTargetHost String? @map("saas_target_host")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   pwas        Pwa[]
+  customHostnames CloudflareCustomHostname[]
 }
 
 model NamecheapDomain {
@@ -52,5 +58,28 @@ model Domain {
   updatedAt  DateTime          @updatedAt
   pwa        Pwa?              @relation(fields: [pwaId], references: [id], onDelete: Cascade)
   cloudflare CloudflareDomain?
+  customHostname CloudflareCustomHostname?
   namecheap  NamecheapDomain?
+}
+
+model CloudflareCustomHostname {
+  id         String   @id @default(cuid())
+  hostname   String
+  cloudflareId String @unique @map("cloudflare_id")
+  status     String?
+  ssl        Json?
+  ownershipVerification     Json? @map("ownership_verification")
+  ownershipVerificationHttp Json? @map("ownership_verification_http")
+  verificationErrors        Json? @map("verification_errors")
+
+  domainId   String   @unique @map("domain_id")
+  domain     Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  cloudflareAccountId String? @map("cloudflare_account_id")
+  cloudflareAccount   CloudflareAccount? @relation(fields: [cloudflareAccountId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([hostname])
 }

@@ -17,6 +17,9 @@ model CloudflareAccount {
   apiToken    String   @map("api_token")
   email       String?
   status      String?  @default("ACTIVE")
+  // Last readiness check / status update explanation for super-admin UI.
+  statusComment   String?   @map("status_comment")
+  statusCheckedAt DateTime? @map("status_checked_at")
   zoneCount   Int      @default(0) @map("zone_count")
   workerCount Int      @default(0) @map("worker_count")
   // Cloudflare for SaaS (Custom Hostnames) config.

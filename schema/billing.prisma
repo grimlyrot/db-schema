@@ -1,0 +1,183 @@
+enum BillingProvider {
+  CLOUDFLARE
+  DIGITALOCEAN
+  VERCEL
+  PULUMI
+  GITHUB
+  NAMECHEAP
+  CLOUDINARY
+  SENTRY
+  OPENAI
+  BETTERSTACK
+  JITSU
+}
+
+enum BillingIntegrationStatus {
+  ACTIVE
+  DISABLED
+  ERROR
+  MISSING_PERMISSIONS
+}
+
+enum BillingImportStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum BillingRecordType {
+  INVOICE
+  LINE_ITEM
+  CHARGE
+  PAYMENT
+  REFUND
+  CREDIT
+  ADJUSTMENT
+  USAGE_ESTIMATE
+  MANUAL
+}
+
+enum BillingRecurringInterval {
+  MONTHLY
+  YEARLY
+}
+
+model BillingIntegration {
+  id        String   @id @default(cuid())
+  provider  BillingProvider
+  // Unique stable key for idempotent imports, e.g.:
+  // "digitalocean:default", "vercel:team_<id>", "cloudflare:<cloudflareAccountId>"
+  sourceKey String   @unique @map("source_key")
+  name      String
+
+  // Provider-specific identifier (teamId/org/accountId/customerId/etc).
+  accountKey String? @map("account_key")
+
+  // Provider credentials payload:
+  // - DigitalOcean: { "token": "..." }
+  // - Vercel:       { "token": "...", "teamId": "..." }
+  // - GitHub:       { "token": "...", "org": "..." }
+  // - OpenAI:       { "apiKey": "..." }
+  // NOTE: keep tokens out of API responses.
+  credentials Json?
+
+  // Optional link for integrations that reuse existing stored secrets.
+  cloudflareAccountId String? @map("cloudflare_account_id")
+  cloudflareAccount   CloudflareAccount? @relation("CloudflareAccountBillingIntegrations", fields: [cloudflareAccountId], references: [id], onDelete: SetNull)
+
+  status          BillingIntegrationStatus @default(ACTIVE)
+  statusComment   String?   @map("status_comment")
+  statusCheckedAt DateTime? @map("status_checked_at")
+
+  lastImportedAt DateTime? @map("last_imported_at")
+
+  // Billing cycle hints (optional; used for UI/analytics grouping).
+  billingAnchorDay Int?    @map("billing_anchor_day")
+  billingTimezone  String? @map("billing_timezone")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  records       BillingRecord[]
+  usageSnapshots BillingUsageSnapshot[]
+  importRuns    BillingImportRun[]
+  recurringCosts BillingRecurringCost[]
+
+  @@index([provider])
+  @@map("billing_integrations")
+}
+
+model BillingImportRun {
+  id            String   @id @default(cuid())
+  integrationId String   @map("integration_id")
+  integration   BillingIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  status    BillingImportStatus @default(RUNNING)
+  message   String?
+  stats     Json?
+
+  startedAt  DateTime @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+
+  @@index([integrationId])
+  @@index([status])
+  @@map("billing_import_runs")
+}
+
+model BillingRecord {
+  id            String   @id @default(cuid())
+  provider      BillingProvider
+  integrationId String   @map("integration_id")
+  integration   BillingIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  // Deterministic unique key to avoid duplicates on re-import.
+  sourceKey String @unique @map("source_key")
+
+  externalId  String? @map("external_id")
+  type        BillingRecordType
+
+  // Amount is signed: charges are positive, refunds/credits negative (when available).
+  amount   Decimal @db.Decimal(20, 6)
+  currency String
+
+  description String?
+  status      String?
+
+  occurredAt  DateTime @map("occurred_at")
+  periodStart DateTime? @map("period_start")
+  periodEnd   DateTime? @map("period_end")
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider, occurredAt])
+  @@index([integrationId, occurredAt])
+  @@map("billing_records")
+}
+
+model BillingUsageSnapshot {
+  id            String   @id @default(cuid())
+  provider      BillingProvider
+  integrationId String   @map("integration_id")
+  integration   BillingIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  sourceKey String @unique @map("source_key")
+
+  capturedAt  DateTime @default(now()) @map("captured_at")
+  periodStart DateTime? @map("period_start")
+  periodEnd   DateTime? @map("period_end")
+
+  metrics Json
+
+  createdAt DateTime @default(now())
+
+  @@index([provider, capturedAt])
+  @@index([integrationId, capturedAt])
+  @@map("billing_usage_snapshots")
+}
+
+model BillingRecurringCost {
+  id            String   @id @default(cuid())
+  provider      BillingProvider
+  integrationId String?  @map("integration_id")
+  integration   BillingIntegration? @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  name        String
+  amount      Decimal @db.Decimal(20, 6)
+  currency    String
+  interval    BillingRecurringInterval
+  // Used for MONTHLY/YEARLY schedules where the billing day differs from calendar boundaries.
+  dayOfMonth  Int?    @map("day_of_month")
+  startsAt    DateTime @default(now()) @map("starts_at")
+  endsAt      DateTime? @map("ends_at")
+  metadata    Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider])
+  @@index([integrationId])
+  @@map("billing_recurring_costs")
+}

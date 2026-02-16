@@ -30,6 +30,9 @@ model Pwa {
   reviews Review[]
   // END DESIGN
 
+  // Localized design (multi-language store page content)
+  designLocales PwaDesignLocale[]
+
   // USER
   creator   User   @relation(fields: [creatorId], references: [id])
   creatorId String @map("creator_id")
@@ -99,6 +102,7 @@ model Pwa {
   pushTargets PushTargetPwa[]
 
   @@index([teamId])
+  @@index([edgeAccountId], map: "Pwa_edge_account_id_idx")
 }
 
 enum Variant {

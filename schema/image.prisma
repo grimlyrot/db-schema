@@ -4,11 +4,14 @@ model Image {
   url              String
   publicId         String        @map("public_id")
   pwaId            String?
+  pwaDesignLocaleId String?      @map("pwa_design_locale_id")
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   Pwa              Pwa?          @relation("images", fields: [pwaId], references: [id])
+  designLocale     PwaDesignLocale? @relation("localeImages", fields: [pwaDesignLocaleId], references: [id], onDelete: Cascade)
   pushContentImage PushContent[] @relation("PushContentIcon")
   pushContentIcon  PushContent[] @relation("PushContentIconImage")
   iconOf           Pwa[]         @relation("icon")
+  localeIconOf     PwaDesignLocale[] @relation("localeIcon")
   User             User?
 }

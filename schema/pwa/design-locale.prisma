@@ -1,0 +1,73 @@
+model PwaDesignLocale {
+  id String @id @default(cuid())
+
+  pwa   Pwa    @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+  pwaId String @map("pwa_id")
+
+  // Lowercase locale code (e.g. "en", "fr", "ru", "ua"). We intentionally
+  // keep it as a string to support legacy aliases (e.g. "uk" -> "ua").
+  locale String @map("locale")
+  isMain Boolean  @default(false) @map("is_main")
+
+  // DESIGN (localized)
+  name          String?
+  developerName String?  @map("developer_name")
+  verified      Boolean  @default(false)
+  fileSize      Int?     @map("file_size")
+  ageRating     AgeRating? @map("age_rating")
+  totalDownloads Int?    @map("total_downloads")
+
+  description String?
+  tags        PwaTag[]
+
+  updateDate        DateTime? @map("update_date")
+  updateDescription String?   @map("update_description")
+
+  iconImage   Image?  @relation("localeIcon", fields: [iconImageId], references: [id])
+  iconImageId String? @map("icon_image_id")
+
+  images Image[] @relation("localeImages")
+
+  // Rating (localized)
+  ratingTotalRating      Float? @map("rating_total_rating")
+  ratingTotalReviews     Int?   @map("rating_total_reviews")
+  ratingFiveStarPercent  Float? @map("rating_five_star_percent")
+  ratingFourStarPercent  Float? @map("rating_four_star_percent")
+  ratingThreeStarPercent Float? @map("rating_three_star_percent")
+  ratingTwoStarPercent   Float? @map("rating_two_star_percent")
+  ratingOneStarPercent   Float? @map("rating_one_star_percent")
+
+  // Comments (localized)
+  reviews PwaDesignLocaleReview[]
+
+  // Video trailer (localized)
+  trailer Json? @map("trailer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pwaId, locale])
+  @@index([pwaId])
+  @@index([pwaId, isMain])
+}
+
+model PwaDesignLocaleReview {
+  id              String   @id @default(cuid())
+  avatar          String?
+  userName        String   @map("user_name")
+  publicationDate DateTime @map("publication_date")
+  rating          Int
+  likes           Int      @default(0)
+  text            String
+  replyUserName   String?  @map("reply_user_name")
+  replyDate       DateTime? @map("reply_date")
+  replyText       String?  @map("reply_text")
+
+  designLocale   PwaDesignLocale @relation(fields: [designLocaleId], references: [id], onDelete: Cascade)
+  designLocaleId String          @map("design_locale_id")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([designLocaleId])
+}

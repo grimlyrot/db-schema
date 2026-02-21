@@ -19,6 +19,8 @@ Service repositories should:
 ```bash
 pnpm install
 export POSTGRES_URL="postgresql://..."
+# or
+export DATABASE_URL="postgresql://..."
 pnpm schema:validate
 pnpm migrate:dev -- --name your_change
 ```
@@ -29,6 +31,8 @@ In CI/CD:
 
 ```bash
 export POSTGRES_URL="postgresql://..."
+# or
+export DATABASE_URL="postgresql://..."
 pnpm migrate:deploy
 ```
 

@@ -9,13 +9,13 @@
   "scripts": {
     "workdir:build": "bash tooling/build-workdir.sh",
     "workdir:clean": "rm -rf .work",
-    "schema:validate": "pnpm run workdir:build && prisma validate --schema .work/prisma/schema && pnpm run workdir:clean",
-    "schema:format": "pnpm run workdir:build && prisma format   --schema .work/prisma/schema && pnpm run workdir:clean",
-    "migrate:dev": "pnpm run workdir:build && prisma migrate dev    --schema .work/prisma/schema && pnpm run workdir:clean",
-    "migrate:deploy": "pnpm run workdir:build && prisma migrate deploy --schema .work/prisma/schema && pnpm run workdir:clean",
-    "diff:from-db": "pnpm run workdir:build && prisma migrate diff --from-url \"$POSTGRES_URL\" --to-schema-datamodel .work/prisma/schema && pnpm run workdir:clean",
-    "diff:from-empty": "pnpm run workdir:build && prisma migrate diff --from-empty --to-schema-datamodel .work/prisma/schema --script && pnpm run workdir:clean",
-    "db:pull": "pnpm run workdir:build && prisma db pull --schema .work/prisma/schema && pnpm run workdir:clean"
+    "schema:validate": "pnpm run workdir:build && bash tooling/with-postgres-url.sh prisma validate --schema .work/prisma/schema && pnpm run workdir:clean",
+    "schema:format": "pnpm run workdir:build && bash tooling/with-postgres-url.sh prisma format --schema .work/prisma/schema && pnpm run workdir:clean",
+    "migrate:dev": "pnpm run workdir:build && bash tooling/with-postgres-url.sh prisma migrate dev --schema .work/prisma/schema && pnpm run workdir:clean",
+    "migrate:deploy": "pnpm run workdir:build && bash tooling/with-postgres-url.sh prisma migrate deploy --schema .work/prisma/schema && pnpm run workdir:clean",
+    "diff:from-db": "pnpm run workdir:build && bash tooling/with-postgres-url.sh sh -lc 'prisma migrate diff --from-url \"$POSTGRES_URL\" --to-schema-datamodel .work/prisma/schema' && pnpm run workdir:clean",
+    "diff:from-empty": "pnpm run workdir:build && bash tooling/with-postgres-url.sh prisma migrate diff --from-empty --to-schema-datamodel .work/prisma/schema --script && pnpm run workdir:clean",
+    "db:pull": "pnpm run workdir:build && bash tooling/with-postgres-url.sh prisma db pull --schema .work/prisma/schema && pnpm run workdir:clean"
   },
   "dependencies": {
     "@prisma/client": "5.22.0"

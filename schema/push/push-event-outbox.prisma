@@ -1,0 +1,36 @@
+enum PushEventOutboxChannel {
+  PUSH
+  CLIENT
+}
+
+enum PushEventOutboxOp {
+  INSERT
+  UPDATE
+  DELETE
+}
+
+enum PushEventOutboxStatus {
+  PENDING
+  SENT
+}
+
+model PushEventOutbox {
+  id            String                @id @default(cuid())
+  dedupeKey     String                @unique @map("dedupe_key")
+  channel       PushEventOutboxChannel
+  op            PushEventOutboxOp
+  entityId      String                @map("entity_id")
+  payload       Json
+  status        PushEventOutboxStatus @default(PENDING)
+  attempts      Int                   @default(0)
+  nextAttemptAt DateTime              @default(now()) @map("next_attempt_at")
+  processedAt   DateTime?             @map("processed_at")
+  lastError     String?               @map("last_error")
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+
+  @@index([status, nextAttemptAt])
+  @@index([channel, status, nextAttemptAt])
+  @@index([entityId, channel])
+  @@map("push_event_outbox")
+}

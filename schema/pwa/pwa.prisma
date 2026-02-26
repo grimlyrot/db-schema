@@ -81,6 +81,7 @@ model Pwa {
 
   pushEnabled   Boolean @default(true) @map("push_enabled")
   richUi        Boolean @default(false) @map("rich_ui")
+  uiDesign      String  @default("APP") @map("ui_design")
   themeChanging Boolean @default(false) @map("theme_changing")
 
   // Edge runtime config

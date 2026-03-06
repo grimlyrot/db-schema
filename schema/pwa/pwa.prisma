@@ -10,6 +10,7 @@ model Pwa {
   iconImage      Image?     @relation("icon", fields: [iconImageId], references: [id])
   iconImageId    String?    @map("icon")
   name           String?
+  adminTitle     String?    @map("admin_title")
   developerName  String?    @map("developer_name")
   verified       Boolean    @default(false)
   fileSize       Int?       @map("file_size")

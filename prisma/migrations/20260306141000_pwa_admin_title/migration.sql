@@ -1,0 +1,2 @@
+ALTER TABLE "Pwa"
+  ADD COLUMN IF NOT EXISTS "admin_title" TEXT;

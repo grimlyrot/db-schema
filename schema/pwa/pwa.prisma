@@ -70,6 +70,7 @@ model Pwa {
   // Need to copy evering when creating a shadow
   cloackSettings CloakSettings?
   domain         Domain[]
+  domainPurchaseAttempts DomainPurchaseAttempt[]
   tracker        Tracker?
 
   developerContacts   DeveloperContacts? @relation(fields: [developerContactsId], references: [id])

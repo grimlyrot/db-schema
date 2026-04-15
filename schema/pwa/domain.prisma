@@ -64,6 +64,40 @@ model Domain {
   cloudflare CloudflareDomain?
   customHostname CloudflareCustomHostname?
   namecheap  NamecheapDomain?
+  purchaseAttempts DomainPurchaseAttempt[]
+}
+
+model DomainPurchaseAttempt {
+  id          String               @id @default(cuid())
+  normalizedDomain String          @map("normalized_domain")
+  sourceDomain String              @map("source_domain")
+  activeClaimKey String?           @unique(map: "DomainPurchaseAttempt_active_claim_key_key") @map("active_claim_key")
+  status      DomainPurchaseStatus
+  reason      String?
+  provider    String               @default("NAMECHEAP")
+  attemptCount Int                 @default(1) @map("attempt_count")
+  automaticReconciliationAttempts Int @default(0) @map("automatic_reconciliation_attempts")
+  manualReconciliationAttempts Int @default(0) @map("manual_reconciliation_attempts")
+  providerPurchaseConfirmedAt DateTime? @map("provider_purchase_confirmed_at")
+  setupStartedAt DateTime?         @map("setup_started_at")
+  setupCompletedAt DateTime?       @map("setup_completed_at")
+  lastStatusCheckAt DateTime?      @map("last_status_check_at")
+  timeoutAt   DateTime?            @map("timeout_at")
+  lastErrorCode String?            @map("last_error_code")
+  lastErrorMessage String?         @map("last_error_message")
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+
+  domainId    String?              @map("domain_id")
+  domain      Domain?              @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  pwaId       String?              @map("pwa_id")
+  pwa         Pwa?                 @relation(fields: [pwaId], references: [id], onDelete: SetNull)
+
+  @@index([normalizedDomain], map: "DomainPurchaseAttempt_normalized_domain_idx")
+  @@index([pwaId, normalizedDomain], map: "DomainPurchaseAttempt_pwa_id_normalized_domain_idx")
+  @@index([pwaId], map: "DomainPurchaseAttempt_pwa_id_idx")
+  @@index([domainId], map: "DomainPurchaseAttempt_domain_id_idx")
+  @@index([status], map: "DomainPurchaseAttempt_status_idx")
 }
 
 model CloudflareCustomHostname {

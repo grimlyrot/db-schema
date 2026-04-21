@@ -12,6 +12,7 @@ model CloakSettings {
   pixelInWhitePage         Boolean      @default(false) @map("pixel_in_white_page")
   redirectType             RedirectType @default(CUSTOM) @map("redirect_type")
   whitePageUrl             String?      @map("white_page_url")
+  generatedWhitepage       Json?        @map("generated_whitepage")
   pwaId                    String       @unique @map("pwa_id")
   createdAt                DateTime     @default(now())
   updatedAt                DateTime     @updatedAt

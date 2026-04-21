@@ -1,3 +1,19 @@
+model WhitepageArtifact {
+  id            String   @id @default(cuid())
+  pwaId         String   @map("pwa_id")
+  correlationId String   @map("correlation_id")
+  playUrl       String   @map("play_url")
+  title         String
+  description   String
+  iconUrl       String   @map("icon_url")
+  screenshots   String[]
+  createdAt     DateTime @default(now())
+  pwa           Pwa      @relation(fields: [pwaId], references: [id], onDelete: Cascade)
+
+  @@index([pwaId])
+  @@map("whitepage_artifacts")
+}
+
 model CloakSettings {
   id                       String       @id @default(cuid())
   androidOnly              Boolean      @default(false) @map("android_only")

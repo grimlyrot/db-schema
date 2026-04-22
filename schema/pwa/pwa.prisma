@@ -68,8 +68,9 @@ model Pwa {
 
   //#region Relations
   // Need to copy evering when creating a shadow
-  cloackSettings CloakSettings?
-  domain         Domain[]
+  cloackSettings     CloakSettings?
+  whitepageArtifacts WhitepageArtifact[]
+  domain             Domain[]
   domainPurchaseAttempts DomainPurchaseAttempt[]
   tracker        Tracker?
 
